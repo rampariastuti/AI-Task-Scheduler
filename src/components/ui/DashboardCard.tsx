@@ -9,6 +9,7 @@ interface DashboardCardProps {
   value: string | number;
   icon: LucideIcon;
   trend?: number;
+  subtext?: string; // Optional - only used in admin dashboard
   className?: string;
 }
 
@@ -17,6 +18,7 @@ export const DashboardCard = ({
   value, 
   icon: Icon, 
   trend, 
+  subtext,
   className 
 }: DashboardCardProps) => (
   <motion.div 
@@ -36,15 +38,22 @@ export const DashboardCard = ({
         <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">
           {title}
         </p>
-        <h3 className="text-3xl font-black tracking-tighter text-white italic">
+        <h3 className="text-3xl font-black tracking-tighter text-white italic leading-tight">
           {value}
         </h3>
+        {/* Optional subtext - only shown for admin cards */}
+        {subtext && (
+          <p className="text-[9px] font-medium text-accent-primary/70 uppercase tracking-wider mt-1.5 bg-accent-primary/5 px-2 py-0.5 rounded-full inline-block">
+            {subtext}
+          </p>
+        )}
       </div>
       <div className="p-4 bg-white/5 rounded-2xl text-accent-primary group-hover:scale-110 group-hover:bg-accent-primary/10 transition-all duration-300">
         <Icon size={24} />
       </div>
     </div>
 
+    {/* Trend indicator - only shown when provided */}
     {trend !== undefined && (
       <div className="mt-6 flex items-center gap-2 relative z-10">
         <span className={cn(
@@ -54,7 +63,7 @@ export const DashboardCard = ({
           {trend > 0 ? "+" : ""}{trend}%
         </span>
         <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">
-          Interval Shift
+          vs last week
         </span>
       </div>
     )}

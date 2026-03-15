@@ -14,7 +14,7 @@ export const AISelectionTool = () => {
     setTimeout(() => {
       setRecommendations([
         { id: 1, name: "Shrey Thakkar", score: 98, reason: "Expert in Flutter & Firebase" },
-        { id: 2, name: "Stuti S.", score: 85, reason: "Matches 3/4 required skills" }
+        { id: 2, name: "Stuti R.", score: 85, reason: "Matches 3/4 required skills" }
       ]);
       setIsAnalyzing(false);
     }, 2000);

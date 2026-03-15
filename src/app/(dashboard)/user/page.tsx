@@ -9,6 +9,7 @@ import { UserStats } from "@/components/dashboard/UserStats";
 import { AddTaskModal } from "@/components/dashboard/AddTaskModal";
 import { getTaskRecommendation } from "@/lib/gemini";
 import { Plus, Sparkles, Loader2, BrainCircuit, Search, LayoutGrid } from "lucide-react";
+import { setMargin } from "recharts/types/state/layoutSlice";
 
 export default function UserDashboard() {
   const { user } = useAuth();
@@ -41,7 +42,7 @@ export default function UserDashboard() {
   }, [user]);
 
   const processedTasks = useMemo(() => {
-    const filtered = tasks.filter(t => 
+    const filtered = tasks.filter(t =>
       t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -65,11 +66,12 @@ export default function UserDashboard() {
           </h1>
           <p className="text-gray-500 mt-1 font-bold text-xs uppercase tracking-widest">Intelligent Execution Environment</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-white text-black px-6 py-3 rounded-2xl font-black text-xs hover:scale-105 transition-all shadow-xl uppercase italic"
+          className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-2xl font-black text-xs hover:scale-105 transition-all shadow-xl uppercase italic"
         >
-          <Plus size={18} /> New Task
+          <Plus size={18} />
+          New Task
         </button>
       </header>
 
@@ -90,7 +92,7 @@ export default function UserDashboard() {
 
       <div className="relative group">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-accent-primary transition-colors" size={20} />
-        <input 
+        <input
           type="text"
           placeholder="Filter missions by keywords..."
           value={searchQuery}
