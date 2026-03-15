@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ TaskAI: The Intelligent SaaS Ecosystem
 
-## Getting Started
+TaskAI is a premium, multi-role task management platform that leverages **Google Gemini 1.5 Flash** to provide real-time tactical feedback and automated priority escalation. Designed with a "Deep Night" glassmorphic aesthetic, it offers a high-performance environment for Admins, Managers, and Users.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🤖 Gemini-Powered Intelligence
+- **Tactical Feedback:** The AI analyzes pending workloads and generates strategic action plans for users.
+- **Priority Escalation:** Automatic detection of approaching deadlines ( < 24h) with visual "Escalated" status indicators.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 👥 Role-Based Architecture
+- **Admin Console:** Real-time system heuristics, user counts, and global efficiency tracking using Recharts.
+- **Manager Command:** Global task oversight with the ability to search team members and assign missions directly.
+- **User Workspace:** Personal task management with AI-driven daily insights.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🎨 Premium UI/UX
+- **Aesthetic:** Deep-space theme with glassmorphism, backdrop blurs, and satin finishes.
+- **Animations:** Fluid transitions and layout changes powered by Framer Motion.
+- **Responsiveness:** Fully optimized for mobile, tablet, and desktop viewports.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Framework:** Next.js 16 (Turbopack)
+- **Database/Auth:** Firebase (Firestore & Authentication)
+- **AI Engine:** Google Gemini AI SDK
+- **Styling:** Tailwind CSS
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **Data Visualization:** Recharts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## ⚙️ Installation & Setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/shreythakkar2056/ai-task-scheduler.git](https://github.com/yourusername/ai-task-scheduler.git)
+   cd ai-task-scheduler
+2.**Install dependencies:**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+    npm install
+3. **.env.local**
+    # Firebase Client Configuration
+    NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyDDfu-4pvDErL8a8ST6iG1luuhYSYWIppA"
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="ai-task-scheduler-79ad8.firebaseapp.com"
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID="ai-task-scheduler-79ad8"
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="ai-task-scheduler-79ad8.firebasestorage.app"
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="644234486489"
+    NEXT_PUBLIC_FIREBASE_APP_ID="1:644234486489:web:654e2335f429c0a84894c8"
+
+    # AI Configuration
+    NEXT_PUBLIC_GEMINI_API_KEY=add api key
+4 ** run**
+    npm run dev
