@@ -38,7 +38,7 @@ TaskAI is a premium, multi-role task management platform that leverages **Google
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/shreythakkar2056/ai-task-scheduler.git](https://github.com/yourusername/ai-task-scheduler.git)
+   git clone [https://github.com/shreythakkar2056/ai-task-scheduler.git]
    cd ai-task-scheduler
 2.**Install dependencies:**
 
@@ -46,12 +46,12 @@ TaskAI is a premium, multi-role task management platform that leverages **Google
     npm install
 3. **.env.local**
     # Firebase Client Configuration
-    NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyDDfu-4pvDErL8a8ST6iG1luuhYSYWIppA"
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="ai-task-scheduler-79ad8.firebaseapp.com"
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID="ai-task-scheduler-79ad8"
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="ai-task-scheduler-79ad8.firebasestorage.app"
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="644234486489"
-    NEXT_PUBLIC_FIREBASE_APP_ID="1:644234486489:web:654e2335f429c0a84894c8"
+    NEXT_PUBLIC_FIREBASE_API_KEY="XYZ"
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="XYZ"
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID="XYZ"
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="XYZ"
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="XYZ"
+    NEXT_PUBLIC_FIREBASE_APP_ID="XYZ"
 
     # AI Configuration
     NEXT_PUBLIC_GEMINI_API_KEY=add api key
