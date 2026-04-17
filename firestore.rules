@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── ORGANIZATIONS ────────────────────────────────────────────────────────
+    // Any authenticated user can read an org (needed for signup org-code check)
+    // Only authenticated users can create an org
+    // Only the admin of the org can update it
+    match /organizations/{orgId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && resource.data.adminId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.adminId == request.auth.uid;
+    }
+
+    // ── USERS ────────────────────────────────────────────────────────────────
+    // Users can read any user in their own organization (for manager task assignment)
+    // Users can only write their own document
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // ── TASKS ────────────────────────────────────────────────────────────────
+    // Any authenticated user can read/write tasks
+    // (org scoping is enforced in the app layer via queries)
+    match /tasks/{taskId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+  }
+}

@@ -51,8 +51,7 @@ export const getSingleTaskAnalysis = async (task: {
     `;
 
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
+    return result.response.text().trim();
   } catch (error) {
     console.error("Gemini API Error:", error);
     return getFallbackResponse(task);
@@ -78,6 +77,95 @@ function getFallbackResponse(task: {
 
 ⏱️ ESTIMATED EFFORT: ${task.priority === 3 ? "High - Critical path item" : task.priority === 2 ? "Medium - Requires focus" : "Low - Quick win"}`;
 }
+
+export const getAIPriority = async (title: string, description: string): Promise<number> => {
+  if (!apiKey) return 2;
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const prompt = `
+      Task Title: "${title}"
+      Task Description: "${description}"
+
+      Assign a priority level. Reply with ONLY a single digit — 1, 2, or 3. Nothing else.
+      1 = Low (routine, no urgency)
+      2 = Medium (important, moderate urgency)
+      3 = Critical (urgent, high-impact, time-sensitive)
+    `;
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    const p = parseInt(text.match(/[1-3]/)?.[0] || "2");
+    return [1, 2, 3].includes(p) ? p : 2;
+  } catch {
+    return 2;
+  }
+};
+
+export const createTaskFromIdea = async (idea: string): Promise<{
+  title: string;
+  description: string;
+  priority: number;
+  deadline: string;
+  tags: string[];
+}> => {
+  const sevenDaysLater = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    .toISOString().slice(0, 16);
+
+  const fallback = {
+    title: idea.length > 60 ? idea.slice(0, 57) + "..." : idea,
+    description: `Task based on idea: "${idea}". Add more details to get started.`,
+    priority: 2,
+    deadline: sevenDaysLater,
+    tags: ["idea", "ai-generated"],
+  };
+
+  if (!apiKey) return fallback;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const today = new Date().toISOString().slice(0, 10);
+
+    const prompt = `
+      You are a smart task management AI assistant. The user has this idea: "${idea}"
+      Today's date is ${today}.
+
+      Create a complete actionable task from this idea. Respond ONLY with valid JSON — no markdown, no explanation:
+      {
+        "title": "action-oriented task title under 60 chars",
+        "description": "2-3 specific sentences on what to do and how",
+        "priority": 2,
+        "deadline": "YYYY-MM-DDTHH:MM",
+        "tags": ["tag1", "tag2"]
+      }
+
+      Priority rules:
+      - 3 = Critical: urgent, high-impact, time-sensitive
+      - 2 = Medium: important but not immediately urgent
+      - 1 = Low: nice-to-have, low stakes
+
+      Deadline: realistic date from today (days to weeks ahead).
+      Title must start with an action verb (e.g., Build, Create, Research, Fix, Design).
+      Return ONLY the JSON object, nothing else.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        title: parsed.title || fallback.title,
+        description: parsed.description || fallback.description,
+        priority: [1, 2, 3].includes(parsed.priority) ? parsed.priority : 2,
+        deadline: parsed.deadline || sevenDaysLater,
+        tags: Array.isArray(parsed.tags) ? parsed.tags : ["ai-generated"],
+      };
+    }
+    return fallback;
+  } catch (error) {
+    console.error("Gemini createTaskFromIdea error:", error);
+    return fallback;
+  }
+};
 
 export const getTaskRecommendation = async (tasks: any[]) => {
   const pending = tasks.filter((t: any) => t.status !== "completed");
@@ -111,8 +199,7 @@ export const getTaskRecommendation = async (tasks: any[]) => {
     `;
 
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
+    return result.response.text().trim();
   } catch (error) {
     console.error("Gemini API Error:", error);
     if (urgent.length > 0) {

@@ -1,54 +1,32 @@
-import { 
-  LayoutDashboard, 
-  CheckSquare, 
-  UserCircle, 
-  Users, 
-  ShieldCheck, 
+import {
+  LayoutDashboard,
+  UserCircle,
+  Users,
+  ShieldCheck,
   Settings,
-  BarChart3,
-  ListTodo
+  UserCog,
+  Building2,
+  ScrollText,
 } from "lucide-react";
 
 export const NAV_ITEMS = {
-  // 1. Navigation for standard Users
   USER: [
-    {
-      label: "My Workspace",
-      href: "/user",
-      icon: LayoutDashboard,
-    },
-    {
-      label: "Profile Settings",
-      href: "/user/profile",
-      icon: UserCircle,
-    }
+    { label: "My Workspace", href: "/user", icon: LayoutDashboard },
+    { label: "Profile", href: "/user/profile", icon: UserCircle },
   ],
 
-  // 2. Navigation for Managers
   MANAGER: [
-    {
-      label: "Team Command",
-      href: "/manager",
-      icon: Users,
-    },
-   
-  
-    {
-      label: "Settings",
-      href: "/user/profile", // Shared profile page
-      icon: Settings,
-    }
+    { label: "Team Command", href: "/manager", icon: Users },
+    { label: "Profile", href: "/user/profile", icon: Settings },
   ],
 
   ADMIN: [
-  {
-    label: "Admin Console",
-    href: "/admin", // This must match your folder: src/app/(dashboard)/admin/page.tsx
-    icon: ShieldCheck,
-  },
-  
-],
+    { label: "Admin Console", href: "/admin", icon: ShieldCheck },
+    { label: "Manage Users", href: "/admin/users", icon: UserCog },
+    { label: "Activity Log", href: "/admin/logs", icon: ScrollText },
+    { label: "Organization", href: "/admin/org", icon: Building2 },
+    { label: "Profile", href: "/user/profile", icon: UserCircle },
+  ],
 };
 
-// Helper type for TypeScript safety
 export type Role = keyof typeof NAV_ITEMS;
