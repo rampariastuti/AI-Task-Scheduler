@@ -159,8 +159,8 @@ export default function ActivityLogPage() {
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all",
               filter === key
-                ? "bg-accent-primary text-white shadow-lg shadow-accent-primary/20"
-                : "bg-white/5 text-gray-500 hover:text-white border border-white/10"
+                ? "bg-accent-primary text-slate-50 shadow-lg shadow-accent-primary/20"
+                : "bg-white/5 text-gray-500 hover:text-gray-900 border border-white/10"
             )}
           >
             {key === "urgent" && <AlertTriangle size={11} />}

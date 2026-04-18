@@ -88,16 +88,31 @@ export default function AdminDashboard() {
     return acc;
   }, {} as Record<string, number>);
 
-  // Last 7 days task breakdown
+  // Last 7 days task breakdown — created vs completed per day
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    const dateStr = d.toISOString().split("T")[0];
-    const dayTasks = allTasks.filter(t => t.createdAt?.startsWith(dateStr));
+    // compare local date string (YYYY-MM-DD)
+    const localDateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const created = allTasks.filter(t => {
+      if (!t.createdAt) return false;
+      const ts = new Date(t.createdAt);
+      const s = `${ts.getFullYear()}-${String(ts.getMonth()+1).padStart(2,"0")}-${String(ts.getDate()).padStart(2,"0")}`;
+      return s === localDateStr;
+    }).length;
+    const completed = allTasks.filter(t => {
+      if (t.status !== "completed") return false;
+      const raw = t.updatedAt || t.createdAt;
+      if (!raw) return false;
+      const ts = new Date(raw);
+      const s = `${ts.getFullYear()}-${String(ts.getMonth()+1).padStart(2,"0")}-${String(ts.getDate()).padStart(2,"0")}`;
+      return s === localDateStr;
+    }).length;
     return {
       label: d.toLocaleDateString("en", { weekday: "short" }),
-      total: dayTasks.length,
-      completed: dayTasks.filter(t => t.status === "completed").length,
+      date: d.toLocaleDateString("en", { month: "short", day: "numeric" }),
+      created,
+      completed,
     };
   });
 
@@ -281,50 +296,92 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 7-Day Task Activity Table */}
+        {/* 7-Day Task Activity — Bar Chart */}
         <div className="glass-panel p-6 rounded-[2rem]">
-          <div className="flex items-center gap-2 mb-5">
-            <TrendingUp size={16} className="text-accent-primary" />
-            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-gray-400">7-Day Task Activity</h3>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={16} className="text-accent-primary" />
+              <h3 className="text-xs font-black uppercase tracking-[0.3em] text-gray-400">7-Day Task Activity</h3>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-accent-primary/70" />
+                <span className="text-[9px] text-gray-500 uppercase font-bold">Created</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-accent-success/70" />
+                <span className="text-[9px] text-gray-500 uppercase font-bold">Completed</span>
+              </div>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left text-[10px] font-bold text-gray-600 uppercase tracking-widest pb-3">Day</th>
-                  <th className="text-right text-[10px] font-bold text-gray-600 uppercase tracking-widest pb-3">Created</th>
-                  <th className="text-right text-[10px] font-bold text-gray-600 uppercase tracking-widest pb-3">Completed</th>
-                  <th className="text-right text-[10px] font-bold text-gray-600 uppercase tracking-widest pb-3">Rate</th>
-                  <th className="text-left text-[10px] font-bold text-gray-600 uppercase tracking-widest pb-3 pl-4">Progress</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {last7Days.map((day, i) => {
-                  const rate = day.total > 0 ? Math.round((day.completed / day.total) * 100) : 0;
-                  return (
-                    <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-                      <td className="py-3 font-bold text-white text-xs">{day.label}</td>
-                      <td className="py-3 text-right text-gray-400 text-xs">{day.total}</td>
-                      <td className="py-3 text-right text-accent-success text-xs font-bold">{day.completed}</td>
-                      <td className="py-3 text-right text-xs font-black">
-                        <span className={day.total === 0 ? "text-gray-700" : rate >= 70 ? "text-accent-success" : rate >= 40 ? "text-accent-warning" : "text-accent-danger"}>
-                          {day.total === 0 ? "—" : `${rate}%`}
-                        </span>
-                      </td>
-                      <td className="py-3 pl-4">
-                        <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-accent-primary rounded-full transition-all duration-500"
-                            style={{ width: `${rate}%` }}
-                          />
+
+          {(() => {
+            const BAR_MAX_PX = 96; // pixel height of bar area
+            const maxVal = Math.max(...last7Days.map(d => Math.max(d.created, d.completed)), 1);
+            const totalActivity = last7Days.reduce((s, d) => s + d.created + d.completed, 0);
+            return (
+              <>
+                {totalActivity === 0 && (
+                  <p className="text-center text-gray-600 text-xs py-4 mb-2">
+                    No task activity in the last 7 days. Assign tasks to see data here.
+                  </p>
+                )}
+                <div className="flex items-end gap-3" style={{ height: `${BAR_MAX_PX + 40}px` }}>
+                  {last7Days.map((day, i) => {
+                    const createdPx = day.created > 0 ? Math.max(Math.round((day.created / maxVal) * BAR_MAX_PX), 8) : 0;
+                    const completedPx = day.completed > 0 ? Math.max(Math.round((day.completed / maxVal) * BAR_MAX_PX), 8) : 0;
+                    const isToday = i === 6;
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <div className="w-full flex items-end gap-0.5" style={{ height: `${BAR_MAX_PX}px` }}>
+                          {/* Created bar */}
+                          <div className="flex-1 flex flex-col justify-end h-full">
+                            <div
+                              className={`w-full rounded-t-md transition-all duration-700 ${isToday ? "bg-accent-primary" : "bg-accent-primary/40"}`}
+                              style={{ height: `${createdPx}px` }}
+                              title={`${day.created} created`}
+                            />
+                          </div>
+                          {/* Completed bar */}
+                          <div className="flex-1 flex flex-col justify-end h-full">
+                            <div
+                              className={`w-full rounded-t-md transition-all duration-700 ${isToday ? "bg-accent-success" : "bg-accent-success/40"}`}
+                              style={{ height: `${completedPx}px` }}
+                              title={`${day.completed} completed`}
+                            />
+                          </div>
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <span className={`text-[9px] font-bold uppercase mt-1 ${isToday ? "text-accent-primary" : "text-gray-600"}`}>
+                          {day.label}
+                        </span>
+                        <span className="text-[8px] text-gray-700">{day.date}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Summary row */}
+                <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-lg font-black text-white">{last7Days.reduce((s, d) => s + d.created, 0)}</p>
+                    <p className="text-[9px] text-gray-600 uppercase font-bold">Tasks Created</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-accent-success">{last7Days.reduce((s, d) => s + d.completed, 0)}</p>
+                    <p className="text-[9px] text-gray-600 uppercase font-bold">Completed</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-accent-primary">
+                      {last7Days.reduce((s, d) => s + d.created, 0) > 0
+                        ? `${Math.round((last7Days.reduce((s, d) => s + d.completed, 0) / last7Days.reduce((s, d) => s + d.created, 0)) * 100)}%`
+                        : "—"}
+                    </p>
+                    <p className="text-[9px] text-gray-600 uppercase font-bold">Completion Rate</p>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </section>
     </div>

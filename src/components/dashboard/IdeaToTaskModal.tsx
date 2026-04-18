@@ -271,7 +271,7 @@ export const IdeaToTaskModal = ({ isOpen, onClose }: IdeaToTaskModalProps) => {
                     <button
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="flex-1 bg-white text-black py-3 rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:bg-gray-200 transition-all shadow-xl uppercase disabled:opacity-60"
+                      className="flex-1 bg-slate-900 text-slate-50 py-3 rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-xl uppercase disabled:opacity-60"
                     >
                       {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                       {isSaving ? "Saving..." : "Save Task"}

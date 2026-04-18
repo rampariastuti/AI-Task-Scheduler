@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail, Lock, User, Sparkles, ArrowRight,
   Shield, Users, UserCircle, AlertCircle, Building2,
-  KeyRound, CheckCircle2, Copy, ChevronLeft
+  KeyRound, CheckCircle2, ChevronLeft, Eye, EyeOff
 } from "lucide-react";
 import {
   createUserWithEmailAndPassword,
@@ -32,11 +32,12 @@ export const AuthForm = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const resetForm = () => {
     setEmail(""); setPassword(""); setName(""); setOrgCode("");
-    setOrgName(""); setErrorMsg(null); setSuccessMsg(null);
+    setOrgName(""); setErrorMsg(null); setSuccessMsg(null); setShowPassword(false);
   };
 
   const validatePassword = (pass: string) => {
@@ -107,7 +108,6 @@ export const AuthForm = () => {
     setLoading(true);
     try {
       if (role === "ADMIN") {
-        // Admin creates a new organization
         const res = await createUserWithEmailAndPassword(auth, email, password);
         const orgRef = await addDoc(collection(db, "organizations"), {
           name: orgName,
@@ -115,7 +115,6 @@ export const AuthForm = () => {
           adminEmail: email,
           createdAt: new Date().toISOString(),
         });
-
         await setDoc(doc(db, "users", res.user.uid), {
           name, email, role,
           organizationId: orgRef.id,
@@ -123,9 +122,7 @@ export const AuthForm = () => {
           createdAt: new Date().toISOString(),
         });
         router.push("/admin");
-
       } else {
-        // Manager / User joins existing org
         const orgDoc = await getDoc(doc(db, "organizations", orgCode.trim()));
         if (!orgDoc.exists()) {
           setErrorMsg("Invalid organization code. Ask your admin for the correct code.");
@@ -153,25 +150,33 @@ export const AuthForm = () => {
     }
   };
 
+  const PasswordToggle = () => (
+    <button
+      type="button"
+      onClick={() => setShowPassword(v => !v)}
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 transition-colors"
+    >
+      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  );
+
   // ── RENDER ───────────────────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-md p-8 sm:p-10 glass-panel rounded-[3rem] relative overflow-hidden shadow-2xl border border-white/5 bg-[#0a0a0a]/80 backdrop-blur-2xl">
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-accent-primary/20 blur-[80px] pointer-events-none" />
-
-      <div className="relative z-10">
+    <div className="w-full">
+      <div>
         {/* Header */}
-        <div className="flex flex-col items-center mb-8">
+        <div className="mb-8">
           <motion.div
             initial={{ scale: 0 }} animate={{ scale: 1 }}
-            className="w-14 h-14 bg-accent-primary rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-accent-primary/30"
+            className="w-12 h-12 bg-accent-primary rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-accent-primary/25"
           >
-            {view === "forgot" ? <KeyRound className="text-white" size={26} /> : <Sparkles className="text-white" size={26} />}
+            {view === "forgot" ? <KeyRound className="text-slate-50" size={22} /> : <Sparkles className="text-slate-50" size={22} />}
           </motion.div>
-          <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase">
-            {view === "login" ? "System Login" : view === "signup" ? "Create Account" : "Reset Password"}
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: "#0f172a", letterSpacing: "-0.8px", marginBottom: 6, lineHeight: 1.1 }}>
+            {view === "login" ? "Welcome back" : view === "signup" ? "Create account" : "Reset password"}
           </h2>
-          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">
-            {view === "login" ? "Identity Verification" : view === "signup" ? "Choose your access level" : "We'll email you a reset link"}
+          <p style={{ fontSize: 13, color: "#64748b", fontWeight: 500 }}>
+            {view === "login" ? "Sign in to your workspace" : view === "signup" ? "Choose your role and get started" : "We'll send you a reset link"}
           </p>
         </div>
 
@@ -211,7 +216,7 @@ export const AuthForm = () => {
             </div>
             <button
               disabled={loading || !!successMsg}
-              className="w-full bg-white text-black font-black py-5 rounded-[1.8rem] flex items-center justify-center gap-3 hover:bg-gray-200 transition-all shadow-2xl mt-2 uppercase text-sm tracking-tight disabled:opacity-60"
+              className="w-full bg-slate-900 text-slate-50 font-black py-5 rounded-[1.8rem] flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-2xl mt-2 uppercase text-sm tracking-tight disabled:opacity-60"
             >
               {loading ? "Sending..." : "Send Reset Link"}
               <ArrowRight size={18} />
@@ -219,7 +224,7 @@ export const AuthForm = () => {
             <button
               type="button"
               onClick={() => { setView("login"); resetForm(); }}
-              className="w-full flex items-center justify-center gap-2 text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-[0.2em] mt-2"
+              className="w-full flex items-center justify-center gap-2 text-[10px] font-bold text-gray-500 hover:text-slate-800 transition-colors uppercase tracking-[0.2em] mt-2"
             >
               <ChevronLeft size={14} /> Back to Login
             </button>
@@ -251,20 +256,21 @@ export const AuthForm = () => {
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                <input type="password" required placeholder="••••••••"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-12 text-white outline-none focus:border-accent-primary/50 transition-all"
+                <input type={showPassword ? "text" : "password"} required placeholder="••••••••"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-12 pr-12 text-white outline-none focus:border-accent-primary/50 transition-all"
                   value={password} onChange={(e) => setPassword(e.target.value)} />
+                <PasswordToggle />
               </div>
             </div>
             <button disabled={loading}
-              className="w-full bg-white text-black font-black py-5 rounded-[1.8rem] flex items-center justify-center gap-3 hover:bg-gray-200 transition-all shadow-2xl mt-4 uppercase text-sm tracking-tight disabled:opacity-60"
+              className="w-full bg-slate-900 text-slate-50 font-black py-5 rounded-[1.8rem] flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-2xl mt-4 uppercase text-sm tracking-tight disabled:opacity-60"
             >
-              {loading ? "Verifying..." : "Access Dashboard"}
+              {loading ? "Signing in..." : "Sign In"}
               <ArrowRight size={18} />
             </button>
             <div className="mt-6 text-center">
               <button type="button" onClick={() => { setView("signup"); resetForm(); }}
-                className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-[0.2em]">
+                className="text-[10px] font-bold text-gray-500 hover:text-slate-800 transition-colors uppercase tracking-[0.2em]">
                 Don't have an account? Sign Up
               </button>
             </div>
@@ -287,8 +293,8 @@ export const AuthForm = () => {
                     className={cn(
                       "flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300",
                       role === r.id
-                        ? "bg-accent-primary border-accent-primary text-white shadow-lg shadow-accent-primary/20"
-                        : "bg-white/5 border-white/5 text-gray-500 hover:border-white/10"
+                        ? "bg-slate-900 border-slate-900 text-slate-50 shadow-lg shadow-black/20"
+                        : "bg-white/5 border-white/10 text-gray-500 hover:bg-white/10"
                     )}
                   >
                     <r.icon size={18} className="mb-1" />
@@ -297,13 +303,13 @@ export const AuthForm = () => {
                 ))}
               </div>
               {role === "ADMIN" && (
-                <p className="text-[9px] text-amber-500/80 ml-1 font-bold">
+                <p className="text-[9px] text-amber-600 ml-1 font-bold">
                   Admin creates a new organization. You'll get an org code to share with your team.
                 </p>
               )}
               {(role === "MANAGER" || role === "USER") && (
-                <p className="text-[9px] text-blue-400/80 ml-1 font-bold">
-                  You'll join an existing organization using the code provided by your admin.
+                <p className="text-[9px] text-indigo-500 ml-1 font-bold">
+                  You'll join an existing organization using the code from your admin.
                 </p>
               )}
             </div>
@@ -358,23 +364,24 @@ export const AuthForm = () => {
               <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Password</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                <input type="password" required placeholder="••••••••"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-12 text-white outline-none focus:border-accent-primary/50 transition-all"
+                <input type={showPassword ? "text" : "password"} required placeholder="••••••••"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-12 pr-12 text-white outline-none focus:border-accent-primary/50 transition-all"
                   value={password} onChange={(e) => setPassword(e.target.value)} />
+                <PasswordToggle />
               </div>
               <p className="text-[9px] text-gray-600 ml-1 mt-1">Min. 6 chars, 1 uppercase, 1 lowercase</p>
             </div>
 
             <button disabled={loading}
-              className="w-full bg-white text-black font-black py-5 rounded-[1.8rem] flex items-center justify-center gap-3 hover:bg-gray-200 transition-all shadow-2xl mt-4 uppercase text-sm tracking-tight disabled:opacity-60"
+              className="w-full bg-slate-900 text-slate-50 font-black py-5 rounded-[1.8rem] flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-2xl mt-4 uppercase text-sm tracking-tight disabled:opacity-60"
             >
               {loading ? "Setting up..." : "Create Account"}
               <ArrowRight size={18} />
             </button>
             <div className="mt-6 text-center">
               <button type="button" onClick={() => { setView("login"); resetForm(); }}
-                className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-[0.2em]">
-                Already have an account? Log In
+                className="text-[10px] font-bold text-gray-500 hover:text-slate-800 transition-colors uppercase tracking-[0.2em]">
+                Already have an account? Sign In
               </button>
             </div>
           </form>

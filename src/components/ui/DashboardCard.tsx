@@ -26,7 +26,7 @@ export const DashboardCard = ({
     animate={{ opacity: 1, y: 0 }}
     whileHover={{ y: -5 }}
     className={cn(
-      "p-6 rounded-[2.5rem] bg-secondary/50 backdrop-blur-md border border-white/5 hover:border-accent-primary/30 transition-all group relative overflow-hidden",
+      "p-6 rounded-[2.5rem] glass-panel hover:border-accent-primary/30 transition-all group relative overflow-hidden",
       className
     )}
   >

@@ -217,7 +217,7 @@ export const AssignTaskModal = ({ isOpen, onClose }: { isOpen: boolean; onClose:
             </div>
 
             <button disabled={isSaving || !assigneeId}
-              className="w-full bg-white text-black py-4 rounded-[1.8rem] font-black flex items-center justify-center gap-3 shadow-xl hover:bg-gray-200 transition-all uppercase text-sm disabled:opacity-50"
+              className="w-full bg-slate-900 text-slate-50 py-4 rounded-[1.8rem] font-black flex items-center justify-center gap-3 shadow-xl hover:bg-slate-800 transition-all uppercase text-sm disabled:opacity-50"
             >
               {isSaving ? <Loader2 className="animate-spin" size={18} /> : <UserPlus size={18} />}
               {isSaving ? "Assigning..." : "Deploy Assignment"}

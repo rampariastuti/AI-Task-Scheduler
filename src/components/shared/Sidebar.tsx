@@ -96,18 +96,27 @@ export const Sidebar = () => {
       )}>
         {/* User info */}
         <div className={cn("flex items-center gap-3", collapsed ? "justify-center" : "px-2")}>
-          <div className={cn(
-            "w-9 h-9 rounded-xl bg-gradient-to-tr shrink-0 shadow-lg flex items-center justify-center",
-            roleColors[role || "USER"] || "from-accent-primary to-purple-500"
-          )}>
-            <span className="text-white text-xs font-black uppercase">
-              {user?.email?.[0] || "U"}
-            </span>
-          </div>
+          {/* Avatar — photo if available, else colored initial */}
+          {(userData?.photoURL || user?.photoURL) ? (
+            <img
+              src={userData?.photoURL || user?.photoURL || ""}
+              alt="Profile"
+              className="w-9 h-9 rounded-xl object-cover shrink-0 shadow-lg ring-1 ring-white/10"
+            />
+          ) : (
+            <div className={cn(
+              "w-9 h-9 rounded-xl bg-gradient-to-tr shrink-0 shadow-lg flex items-center justify-center",
+              roleColors[role || "USER"] || "from-accent-primary to-purple-500"
+            )}>
+              <span className="text-white text-xs font-black uppercase">
+                {(userData?.name || user?.displayName || user?.email || "U")[0].toUpperCase()}
+              </span>
+            </div>
+          )}
           {!collapsed && (
             <div className="overflow-hidden min-w-0">
               <p className="text-[11px] font-bold text-white truncate uppercase tracking-tight">
-                {userData?.name || user?.email?.split("@")[0] || "User"}
+                {userData?.name || user?.displayName || user?.email?.split("@")[0] || "User"}
               </p>
               <p className="text-[10px] text-gray-500 font-medium italic tracking-widest uppercase">
                 {role || "User"}

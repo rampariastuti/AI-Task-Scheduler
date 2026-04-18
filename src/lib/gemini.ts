@@ -8,74 +8,91 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
+export interface TaskAnalysis {
+  summary: string;
+  priorityReason: string;
+  timeNote: string;
+  recommendations: string[];
+  effort: "Low" | "Medium" | "High";
+}
+
 export const getSingleTaskAnalysis = async (task: {
   title: string;
   description: string;
   priority: number;
   status: string;
   deadline?: string;
-}) => {
-  // If no API key, return fallback immediately
-  if (!apiKey) {
-    return getFallbackResponse(task);
-  }
+}): Promise<TaskAnalysis> => {
+  if (!apiKey) return getFallbackAnalysis(task);
 
   try {
-    // Use the correct model name from your working curl command
     const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const priorityText = task.priority === 3 ? "CRITICAL" : task.priority === 2 ? "MEDIUM" : "LOW";
-    const statusText = task.status === "completed" ? "COMPLETED" : "IN PROGRESS";
-    const deadlineText = task.deadline ? `Deadline: ${new Date(task.deadline).toLocaleDateString()}` : "No deadline set";
+    const deadlineText = task.deadline
+      ? `Deadline: ${new Date(task.deadline).toLocaleDateString()}`
+      : "No deadline set";
 
     const prompt = `
-      Analyze this single task and provide helpful feedback:
-      
-      TASK DETAILS:
-      Title: "${task.title}"
+      Analyze this task and respond ONLY with a valid JSON object — no markdown, no explanation.
+
+      Task: "${task.title}"
       Description: "${task.description}"
-      Priority: ${priorityText} (${task.priority}/3)
-      Status: ${statusText}
+      Priority: ${priorityText}
+      Status: ${task.status === "completed" ? "COMPLETED" : "IN PROGRESS"}
       ${deadlineText}
 
-      Please provide a comprehensive analysis with the following structure:
+      Return exactly this JSON shape:
+      {
+        "summary": "1-2 sentences describing what needs to be done",
+        "priorityReason": "1-2 sentences explaining why this priority level fits",
+        "timeNote": "${task.deadline ? "1-2 sentences on deadline urgency and time remaining" : "1-2 sentences suggesting when to tackle this without a deadline"}",
+        "recommendations": ["specific step 1", "specific step 2", "specific step 3"],
+        "effort": "Low" or "Medium" or "High"
+      }
 
-      1. TASK SUMMARY: Briefly restate what needs to be done
-      2. PRIORITY ASSESSMENT: Why this priority level makes sense for this task
-      3. TIME CONSIDERATION: ${task.deadline ? "Comment on the deadline urgency" : "No deadline - suggest setting one if time-sensitive"}
-      4. ACTIONABLE RECOMMENDATIONS: 2-3 specific next steps
-      5. ESTIMATED EFFORT: Low/Medium/High and why
-
-      Keep the tone professional, helpful, and concise. Use bullet points for recommendations.
-      Format the response nicely with clear sections.
+      Be concise and professional. Return ONLY the JSON object.
     `;
 
     const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const text = result.response.text().trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        summary: parsed.summary || "",
+        priorityReason: parsed.priorityReason || "",
+        timeNote: parsed.timeNote || "",
+        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : [],
+        effort: ["Low", "Medium", "High"].includes(parsed.effort) ? parsed.effort : "Medium",
+      };
+    }
+    return getFallbackAnalysis(task);
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return getFallbackResponse(task);
+    return getFallbackAnalysis(task);
   }
 };
 
-// Helper function for fallback response
-function getFallbackResponse(task: {
+function getFallbackAnalysis(task: {
   title: string;
   priority: number;
   deadline?: string;
-}) {
-  const priorityText = task.priority === 3 ? "CRITICAL" : task.priority === 2 ? "MEDIUM" : "LOW";
-  
-  return `📋 TASK ANALYSIS: "${task.title}"
-
-⚠️ PRIORITY: ${priorityText} - ${task.priority === 3 ? "Immediate action required" : task.priority === 2 ? "Schedule accordingly" : "Can be handled when free"}
-
-💡 RECOMMENDATIONS:
-• Review the task requirements carefully
-• Break down into smaller subtasks
-• ${task.deadline ? `Meet the deadline: ${new Date(task.deadline).toLocaleDateString()}` : "Consider setting a deadline for better tracking"}
-
-⏱️ ESTIMATED EFFORT: ${task.priority === 3 ? "High - Critical path item" : task.priority === 2 ? "Medium - Requires focus" : "Low - Quick win"}`;
+}): TaskAnalysis {
+  const priorityText = task.priority === 3 ? "Critical" : task.priority === 2 ? "Medium" : "Low";
+  return {
+    summary: `This task — "${task.title}" — requires your attention and action.`,
+    priorityReason: `Rated ${priorityText} based on its scope and impact.`,
+    timeNote: task.deadline
+      ? `Deadline is ${new Date(task.deadline).toLocaleDateString()}. Plan accordingly.`
+      : "No deadline set. Consider adding one for better tracking.",
+    recommendations: [
+      "Review all task requirements before starting.",
+      "Break it into smaller subtasks for easier execution.",
+      task.deadline ? "Work backwards from the deadline to set milestones." : "Set a personal deadline to stay on track.",
+    ],
+    effort: task.priority === 3 ? "High" : task.priority === 2 ? "Medium" : "Low",
+  };
 }
 
 export const getAIPriority = async (title: string, description: string): Promise<number> => {

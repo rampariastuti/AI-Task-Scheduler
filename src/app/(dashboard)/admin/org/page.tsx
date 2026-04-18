@@ -142,7 +142,7 @@ export default function OrgSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving || orgName === orgData?.name}
-          className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-2xl font-black text-sm hover:bg-gray-200 transition-all shadow-xl uppercase disabled:opacity-50"
+          className="flex items-center gap-2 bg-slate-900 text-slate-50 px-6 py-3 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-xl uppercase disabled:opacity-50"
         >
           {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
           {saving ? "Saving..." : "Save Changes"}

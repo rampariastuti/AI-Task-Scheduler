@@ -180,7 +180,7 @@ export default function ManageUsersPage() {
 
               <button
                 onClick={handleCopyCode}
-                className="w-full bg-accent-primary py-4 rounded-2xl font-black text-white text-sm uppercase flex items-center justify-center gap-2 hover:bg-indigo-500 transition-all"
+                className="w-full bg-accent-primary py-4 rounded-2xl font-black text-slate-50 text-sm uppercase flex items-center justify-center gap-2 hover:bg-indigo-500 transition-all"
               >
                 {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
                 {copied ? "Code Copied!" : "Copy Invite Code"}
@@ -202,7 +202,7 @@ export default function ManageUsersPage() {
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
-          className="flex items-center gap-2 bg-accent-primary text-white px-6 py-3 rounded-2xl font-black text-xs uppercase hover:bg-indigo-500 transition-all shadow-lg shadow-accent-primary/20 w-full sm:w-auto justify-center"
+          className="flex items-center gap-2 bg-accent-primary text-slate-50 px-6 py-3 rounded-2xl font-black text-xs uppercase hover:bg-indigo-500 transition-all shadow-lg shadow-accent-primary/20 w-full sm:w-auto justify-center"
         >
           <UserPlus size={16} /> Add User
         </button>
@@ -223,7 +223,7 @@ export default function ManageUsersPage() {
             <button key={r} onClick={() => setRoleFilter(r)}
               className={cn(
                 "px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all",
-                roleFilter === r ? "bg-accent-primary text-white shadow-lg shadow-accent-primary/20" : "bg-white/5 text-gray-500 hover:text-white border border-white/10"
+                roleFilter === r ? "bg-accent-primary text-slate-50 shadow-lg shadow-accent-primary/20" : "bg-white/5 text-gray-500 hover:text-gray-900 border border-white/10"
               )}
             >{r}</button>
           ))}
